@@ -1,13 +1,27 @@
 (function() {
-    function SongPlayer() {
+    function SongPlayer(Fixtures) {
         var SongPlayer = {};
-        
-        var currentSong = null;
+
+        //  ___     _          _           _  _   _       _ _         _
+        // | _ \_ _(_)_ ____ _| |_ ___    /_\| |_| |_ _ _(_) |__ _  _| |_ ___ ___
+        // |  _/ '_| \ V / _` |  _/ -_)  / _ \  _|  _| '_| | '_ \ || |  _/ -_|_-<
+        // |_| |_| |_|\_/\__,_|\__\___| /_/ \_\__|\__|_| |_|_.__/\_,_|\__\___/__/
+
+        /**
+        * @desc Information for current albumData
+        * @type {Object}
+        */
+        var currentAlbum = Fixtures.getAlbum();
         /**
         * @desc Buzz object audio file
         * @type {Object}
         */
         var currentBuzzObject = null;
+
+        //  ___     _          _          __              _   _
+        // | _ \_ _(_)_ ____ _| |_ ___   / _|_  _ _ _  __| |_(_)___ _ _  ___
+        // |  _/ '_| \ V / _` |  _/ -_) |  _| || | ' \/ _|  _| / _ \ ' \(_-<
+        // |_| |_| |_|\_/\__,_|\__\___| |_|  \_,_|_||_\__|\__|_\___/_||_/__/
 
         /**
         * @function setSong
@@ -36,6 +50,36 @@
             currentBuzzObject.play();
             song.playing = true;
         };
+        /**
+        * @function getSongIndex
+        * @desc Get index of song in the songs array
+        * @param {Object} song
+        * @returns {Number}
+        */
+        var getSongIndex = function(song) {
+            return currentAlbum.songs.indexOf(song);
+        };
+
+        //  ___      _    _ _        _  _   _       _ _         _
+        // | _ \_  _| |__| (_)__    /_\| |_| |_ _ _(_) |__ _  _| |_ ___ ___
+        // |  _/ || | '_ \ | / _|  / _ \  _|  _| '_| | '_ \ || |  _/ -_|_-<
+        // |_|  \_,_|_.__/_|_\__| /_/ \_\__|\__|_| |_|_.__/\_,_|\__\___/__/
+
+        /**
+        * @desc Active song object from list of songs
+        * @type {Object}
+        */
+        SongPlayer.currentSong = null;
+        /**
+        * @function play
+        * @desc Play current or new song
+        * @param {Object} song
+        */
+
+        //  ___      _    _ _      __  __     _   _            _
+        // | _ \_  _| |__| (_)__  |  \/  |___| |_| |_  ___  __| |___
+        // |  _/ || | '_ \ | / _| | |\/| / -_)  _| ' \/ _ \/ _` (_-<
+        // |_|  \_,_|_.__/_|_\__| |_|  |_\___|\__|_||_\___/\__,_/__/
 
         /**
         * @function play
@@ -43,10 +87,11 @@
         * @param {Object} song
         */
         SongPlayer.play = function(song) {
-            if (currentSong !== song) {
+            song = song || SongPlayer.currentSong;
+            if (SongPlayer.currentSong !== song) {
                 setSong(song);
                 playSong(song);
-            } else if (currentSong === song) {
+            } else if (SongPlayer.currentSong === song) {
                 if (currentBuzzObject.isPaused()) {
                     currentBuzzObject.play();
                 }
@@ -58,8 +103,26 @@
         * @param {Object} song
         */
         SongPlayer.pause = function(song) {
+            song = song || SongPlayer.currentSong;
             currentBuzzObject.pause();
             song.playing = false;
+        };
+        /**
+        * @function previous
+        * @desc Set song to previous song in album
+        */
+        SongPlayer.previous = function() {
+            var currentSongIndex = getSongIndex(SongPlayer.currentSong);
+            currentSongIndex--;
+
+            if (currentSongIndex <0) {
+                currentBuzzObject.stop();
+                SongPlayer.currentSong.playing = null;
+            } else {
+                var song = currentAlbum.songs[currentSongIndex];
+                setSong(song);
+                playSong(song);
+            }
         };
 
         return SongPlayer;
@@ -67,5 +130,5 @@
 
     angular
         .module('blocJams')
-        .factory('SongPlayer', SongPlayer);
+        .factory('SongPlayer', ['Fixtures', SongPlayer]);
 })();
